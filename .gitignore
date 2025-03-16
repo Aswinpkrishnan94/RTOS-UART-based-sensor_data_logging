@@ -1,0 +1,17 @@
+echo ".vscode/
+.settings/
+Debug/
+Release/
+build/
+*.bin
+*.elf
+*.hex
+*.o
+*.map
+*.d
+*.dep
+*.out
+*.swp
+*.bak
+*.log
+" 
