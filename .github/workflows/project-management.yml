@@ -1,0 +1,16 @@
+name: Auto Move Issues to Done
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  move_to_done:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move Closed Issue to Done
+        uses: actions/add-to-project@v1
+        with:
+          project-url: https://github.com/Aswinpkrishnan94/RTOS-UART-based-sensor_data_logging/projects/1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          column-name: Done
