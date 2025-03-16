@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Sensor_Task.h"
+#include "Logging_Task.h"
+#include "Watchdog_Task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,6 +48,7 @@ IWDG_HandleTypeDef hiwdg;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
+
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -54,7 +57,7 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+osThreadId_t SensorTaskHandle, LoggingTaskHandle, WatchdogTaskHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,7 +69,9 @@ static void MX_USART3_UART_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+void StartSensorTask(void *argument);
+void StartLoggingTask(void *argument);
+void StartWatchdogTask(void *argument);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -135,6 +140,21 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  const osThreadAttr_t SensorTaskAttributes = {.name = "Sensor Task",
+		  	  	  	  	  	  	  	  	  	   .stack_size = 128, .priority = osPriorityNormal};
+
+  SensorTaskHandle = osThreadNew(StartSensorTask, NULL, &SensorTaskAttributes);
+
+  const osThreadAttr_t LoggingTaskAttributes = {.name = "Logging Task",
+  		  	  	  	  	  	  	  	  	  	    .stack_size = 256, .priority = osPriorityLow};
+
+  LoggingTaskHandle = osThreadNew(StartLoggingTask, NULL, &LoggingTaskAttributes);
+
+  const osThreadAttr_t WatchdogTaskAttributes = {.name = "Watchdog Task",
+    		  	  	  	  	  	  	  	  	  	 .stack_size = 128, .priority = osPriorityHigh};
+
+  WatchdogTaskHandle = osThreadNew(StartWatchdogTask, NULL, &WatchdogTaskAttributes);
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
