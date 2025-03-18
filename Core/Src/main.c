@@ -58,6 +58,9 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* USER CODE BEGIN PV */
 osThreadId_t SensorTaskHandle, LoggingTaskHandle, WatchdogTaskHandle;
+osMessageQueueId_t SensorQueueHandle;
+osMutexId_t uartMutexHandle;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -76,7 +79,8 @@ void StartWatchdogTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+const osThreadAttr_t SensorQueueAttributes = {.name = "Sensor Queue"};
+const osThreadAttr_t uartMutexAttributes = {.name = "UART Mutex"};
 /* USER CODE END 0 */
 
 /**
@@ -120,6 +124,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+  uartMutexHandle = osMutexNew(&uartMutexAttributes);
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -132,6 +137,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  SensorQueueHandle = osMessageQueueNew(10, sizeof(float), &SensorQueueAttributes);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
