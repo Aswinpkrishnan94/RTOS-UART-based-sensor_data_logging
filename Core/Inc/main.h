@@ -31,7 +31,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "dht11_driver.h"
+#include "Sensor_Task.h"
+#include "Logging_Task.h"
+#include "Watchdog_Task.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
