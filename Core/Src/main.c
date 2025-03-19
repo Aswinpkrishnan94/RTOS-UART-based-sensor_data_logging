@@ -25,6 +25,7 @@
 #include "Sensor_Task.h"
 #include "Logging_Task.h"
 #include "Watchdog_Task.h"
+#include "dht11_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
