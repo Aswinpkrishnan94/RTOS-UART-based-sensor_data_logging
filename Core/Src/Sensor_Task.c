@@ -13,6 +13,11 @@
 extern osMessageQueueId_t SensorQueueHandle;
 extern UART_HandleTypeDef huart3;
 
+/**
+  * @brief To read temperature and humidity from DHT11 sensor and
+  * sends data to FreeRTOS Queue
+  * @retval none
+  */
 void StartSensorTask(void *argument)
 {
 	float temperature, humidity;

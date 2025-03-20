@@ -10,6 +10,11 @@
 
 extern IWDG_HandleTypeDef hiwdg;
 
+/**
+  * @brief To reset watchdog timer if tasks stop responding
+  * The watchdog task periodically refreshes the watchdog timer
+  * @retval none
+  */
 void StartWatchdogTask(void *argument)
 {
 	while(1)

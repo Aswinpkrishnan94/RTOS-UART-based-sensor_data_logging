@@ -51,12 +51,15 @@ UART_HandleTypeDef huart3;
 
 
 /* Definitions for defaultTask */
+/*
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+ */
+
 /* USER CODE BEGIN PV */
 osThreadId_t SensorTaskHandle, LoggingTaskHandle, WatchdogTaskHandle;
 osMessageQueueId_t SensorQueueHandle;
@@ -70,7 +73,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_USART3_UART_Init(void);
-void StartDefaultTask(void *argument);
+//void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 void StartSensorTask(void *argument);
@@ -143,7 +146,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -384,16 +387,16 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
+//void StartDefaultTask(void *argument)
+//{
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+//  for(;;)
+//  {
+//    osDelay(1);
+//  }
   /* USER CODE END 5 */
-}
+//}
 
 /**
   * @brief  This function is executed in case of error occurrence.
