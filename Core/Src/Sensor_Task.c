@@ -10,7 +10,7 @@
 #include "dht11_driver.h"
 #include "stm32f4xx_hal.h"
 
-extern osMessageQueueId_t SensorQueueHandle;
+extern osMessageQueueId_t SensorQueueHandle, uartQueueHandle;
 extern UART_HandleTypeDef huart3;
 
 /**
@@ -21,17 +21,26 @@ extern UART_HandleTypeDef huart3;
 void StartSensorTask(void *argument)
 {
 	float temperature, humidity;
+	char debugMsg[50];
+
+	HAL_UART_Transmit(&huart3, (uint8_t *)"Sensor Task Started\r\n", 22, HAL_MAX_DELAY);
+
 	while(1)
 	{
-		Read_DHT11(&temperature, &humidity);	// read sensor data
+		if(Read_DHT11(&temperature, &humidity)==0)	// read sensor data
+		{
+			osMessageQueuePut(SensorQueueHandle, &temperature, 0, osWaitForever);
+			osMessageQueuePut(SensorQueueHandle, &humidity, 0, osWaitForever);
 
-		char dmesg[50];
-		sprintf(dmesg, "Temperature: %.2f, Humidity: %.2f\n", temperature, humidity);
-		HAL_UART_Transmit(&huart3, (uint8_t*)dmesg, strlen(dmesg), 100);	// debugging
+		// Print Debug Message to Check if Data is Sent to the Queue
+		snprintf(debugMsg, sizeof(debugMsg), "Sensor Task: Temp = %.2f°C, Hum = %.2f%%\r\n", temperature, humidity);
+		HAL_UART_Transmit(&huart3, (uint8_t *)debugMsg, strlen(debugMsg), HAL_MAX_DELAY);
 
-		osMessageQueuePut(SensorQueueHandle, &temperature, 0, osWaitForever);
-		osMessageQueuePut(SensorQueueHandle, &humidity, 0, osWaitForever);
-
+		}
+		else
+		{
+			 HAL_UART_Transmit(&huart3, (uint8_t *)"DHT11 Read Failed!\r\n", 21, HAL_MAX_DELAY);
+		}
 		osDelay(2000);		// read every 2s
 	}
 }
