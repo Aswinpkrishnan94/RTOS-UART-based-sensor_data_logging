@@ -103,6 +103,7 @@ uint8_t ReadByte()
   * @retval none
   */
 
+/*
 uint8_t Read_DHT11(float *temperature, float *humidity)
 {
 	uint8_t rhbyte1, rhbyte2, tempbyte1, tempbyte2, checksum;
@@ -138,6 +139,23 @@ uint8_t Read_DHT11(float *temperature, float *humidity)
 		HAL_UART_Transmit(&huart3, (uint8_t *)"DHT11 Read Error\r\n", 19, HAL_MAX_DELAY);
 		return 1;	// error
 	}
+}*/
+
+uint8_t Read_DHT11(float *temperature, float *humidity) {
+    if (temperature == NULL || humidity == NULL) {
+        HAL_UART_Transmit(&huart3, (uint8_t *)"DHT11 Error: NULL Pointer!\r\n", 29, HAL_MAX_DELAY);
+        return 1;  // Return error
+    }
+
+    *humidity = 55.5;   // Hardcoded test values
+    *temperature = 25.8;
+
+    char debug_msg[100];
+    snprintf(debug_msg, sizeof(debug_msg), "Simulated DHT11 Data: Temp = %.2f°C, Hum = %.2f%%\r\n",
+             *temperature, *humidity);
+    HAL_UART_Transmit(&huart3, (uint8_t *)debug_msg, strlen(debug_msg), HAL_MAX_DELAY);
+
+    return 0;
 }
 
 

@@ -20,8 +20,12 @@ extern UART_HandleTypeDef huart3;
   */
 void StartSensorTask(void *argument)
 {
-	float temperature, humidity;
-	char debugMsg[50];
+	//float temperature, humidity;
+	//char debugMsg[50];
+
+	float temperature = 25.8;  // Hardcoded test temperature
+	float humidity = 55.5;     // Hardcoded test humidity
+	char debugMsg[100];
 
 	HAL_UART_Transmit(&huart3, (uint8_t *)"Sensor Task Started\r\n", 22, HAL_MAX_DELAY);
 

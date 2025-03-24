@@ -140,7 +140,7 @@ int main(void)
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
     const osThreadAttr_t SensorTaskAttributes = {.name = "Sensor Task",
-  		  	  	  	  	  	  	  	  	  	   .stack_size = 128, .priority = osPriorityNormal};
+  		  	  	  	  	  	  	  	  	  	   .stack_size = 1024*2, .priority = osPriorityNormal};
 
     SensorTaskHandle = osThreadNew(StartSensorTask, NULL, &SensorTaskAttributes);
     if (SensorTaskHandle == NULL)
@@ -149,7 +149,7 @@ int main(void)
     }
 
     const osThreadAttr_t LoggingTaskAttributes = {.name = "Logging Task",
-    		  	  	  	  	  	  	  	  	  	    .stack_size = 1024, .priority = osPriorityNormal};
+    		  	  	  	  	  	  	  	  	  	    .stack_size = 1024*2, .priority = osPriorityNormal};
 
     LoggingTaskHandle = osThreadNew(StartLoggingTask, NULL, &LoggingTaskAttributes);
     if (LoggingTaskHandle == NULL)
