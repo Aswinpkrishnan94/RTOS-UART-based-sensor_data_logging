@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "i2c.h"
 #include "iwdg.h"
 #include "usart.h"
 #include "gpio.h"
@@ -89,102 +90,104 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-    /* USER CODE END Init */
+  /* USER CODE END Init */
 
-    /* Configure the system clock */
-    SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
-    /* USER CODE BEGIN SysInit */
+  /* USER CODE BEGIN SysInit */
 
-    /* USER CODE END SysInit */
+  /* USER CODE END SysInit */
 
-    /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_USART2_UART_Init();
-    MX_IWDG_Init();
-    MX_USART3_UART_Init();
-    /* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_IWDG_Init();
+  MX_USART3_UART_Init();
+  MX_I2C1_Init();
+  /* USER CODE BEGIN 2 */
     HAL_UART_Transmit(&huart3, (uint8_t *)"UART Test Before RTOS\r\n", 24, HAL_MAX_DELAY);
-    /* USER CODE END 2 */
+  /* USER CODE END 2 */
 
-    /* Init scheduler */
-    osKernelInitialize();
+  /* Init scheduler */
+  osKernelInitialize();
 
-    /* USER CODE BEGIN RTOS_MUTEX */
-    /* add mutexes, ... */
-    uartMutexHandle = osMutexNew(&uartMutexAttributes);
-    /* USER CODE END RTOS_MUTEX */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
+  MX_FREERTOS_Init();
 
-    /* USER CODE BEGIN RTOS_SEMAPHORES */
-    /* add semaphores, ... */
-    /* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE BEGIN RTOS_MUTEX */
+     /* add mutexes, ... */
+     uartMutexHandle = osMutexNew(&uartMutexAttributes);
+     /* USER CODE END RTOS_MUTEX */
 
-    /* USER CODE BEGIN RTOS_TIMERS */
-    /* start timers, add new ones, ... */
-    /* USER CODE END RTOS_TIMERS */
+     /* USER CODE BEGIN RTOS_SEMAPHORES */
+     /* add semaphores, ... */
+     /* USER CODE END RTOS_SEMAPHORES */
 
-    /* USER CODE BEGIN RTOS_QUEUES */
-    /* add queues, ... */
-    SensorQueueHandle = osMessageQueueNew(10, sizeof(float), &SensorQueueAttributes);
-    if (SensorQueueHandle == NULL)
-    {
-        HAL_UART_Transmit(&huart3, (uint8_t *)"Queue Creation Failed!\r\n", 25, HAL_MAX_DELAY);
-    }
-    uartQueueHandle = osMessageQueueNew(10, sizeof(char) * 50, &uartQueue_attributes);
-    /* USER CODE END RTOS_QUEUES */
+     /* USER CODE BEGIN RTOS_TIMERS */
+     /* start timers, add new ones, ... */
+     /* USER CODE END RTOS_TIMERS */
 
-    /* Create the thread(s) */
-    /* creation of defaultTask */
-    //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+     /* USER CODE BEGIN RTOS_QUEUES */
+     /* add queues, ... */
+     SensorQueueHandle = osMessageQueueNew(10, sizeof(float), &SensorQueueAttributes);
+     if (SensorQueueHandle == NULL)
+     {
+         HAL_UART_Transmit(&huart3, (uint8_t *)"Queue Creation Failed!\r\n", 25, HAL_MAX_DELAY);
+     }
+     uartQueueHandle = osMessageQueueNew(10, sizeof(char) * 50, &uartQueue_attributes);
+     /* USER CODE END RTOS_QUEUES */
 
-    /* USER CODE BEGIN RTOS_THREADS */
-    /* add threads, ... */
-    const osThreadAttr_t SensorTaskAttributes = {.name = "Sensor Task",
-  		  	  	  	  	  	  	  	  	  	   .stack_size = 128, .priority = osPriorityNormal};
+     /* Create the thread(s) */
 
-    SensorTaskHandle = osThreadNew(StartSensorTask, NULL, &SensorTaskAttributes);
-    if (SensorTaskHandle == NULL)
-    {
-       HAL_UART_Transmit(&huart3, (uint8_t *)"Sensor Task Creation Failed!\r\n", 30, HAL_MAX_DELAY);
-    }
+     /* USER CODE BEGIN RTOS_THREADS */
+     /* add threads, ... */
+     const osThreadAttr_t SensorTaskAttributes = {.name = "Sensor Task",
+   		  	  	  	  	  	  	  	  	  	   .stack_size = 128, .priority = osPriorityAboveNormal};
 
-    const osThreadAttr_t LoggingTaskAttributes = {.name = "Logging Task",
-    		  	  	  	  	  	  	  	  	  	    .stack_size = 1024, .priority = osPriorityNormal};
+     SensorTaskHandle = osThreadNew(StartSensorTask, NULL, &SensorTaskAttributes);
+     if (SensorTaskHandle == NULL)
+     {
+        HAL_UART_Transmit(&huart3, (uint8_t *)"Sensor Task Creation Failed!\r\n", 30, HAL_MAX_DELAY);
+     }
 
-    LoggingTaskHandle = osThreadNew(StartLoggingTask, NULL, &LoggingTaskAttributes);
-    if (LoggingTaskHandle == NULL)
-    {
-       HAL_UART_Transmit(&huart3, (uint8_t *)"Logging Task Creation Failed!\r\n", 32, HAL_MAX_DELAY);
-    }
+     const osThreadAttr_t LoggingTaskAttributes = {.name = "Logging Task",
+     		  	  	  	  	  	  	  	  	  	    .stack_size = 1024, .priority = osPriorityNormal};
 
-    const osThreadAttr_t WatchdogTaskAttributes = {.name = "Watchdog Task",
-      		  	  	  	  	  	  	  	  	  	 .stack_size = 128, .priority = osPriorityHigh};
+     LoggingTaskHandle = osThreadNew(StartLoggingTask, NULL, &LoggingTaskAttributes);
+     if (LoggingTaskHandle == NULL)
+     {
+        HAL_UART_Transmit(&huart3, (uint8_t *)"Logging Task Creation Failed!\r\n", 32, HAL_MAX_DELAY);
+     }
 
-    WatchdogTaskHandle = osThreadNew(StartWatchdogTask, NULL, &WatchdogTaskAttributes);
-    if (WatchdogTaskHandle == NULL)
-    {
-       HAL_UART_Transmit(&huart3, (uint8_t *)"Logging Task Creation Failed!\r\n", 32, HAL_MAX_DELAY);
-    }
-    /* USER CODE END RTOS_THREADS */
+     const osThreadAttr_t WatchdogTaskAttributes = {.name = "Watchdog Task",
+       		  	  	  	  	  	  	  	  	  	 .stack_size = 128, .priority = osPriorityHigh};
 
-    /* USER CODE BEGIN RTOS_EVENTS */
-    /* add events, ... */
-    /* USER CODE END RTOS_EVENTS */
+     WatchdogTaskHandle = osThreadNew(StartWatchdogTask, NULL, &WatchdogTaskAttributes);
+     if (WatchdogTaskHandle == NULL)
+     {
+        HAL_UART_Transmit(&huart3, (uint8_t *)"Logging Task Creation Failed!\r\n", 32, HAL_MAX_DELAY);
+     }
+     /* USER CODE END RTOS_THREADS */
 
-    /* Start scheduler */
-    osKernelStart();
+     /* USER CODE BEGIN RTOS_EVENTS */
+     /* add events, ... */
+     /* USER CODE END RTOS_EVENTS */
 
-    /* We should never get here as control is now taken by the scheduler */
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
     while (1)
     {
-      /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-      /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
     }
-    /* USER CODE END 3 */
-  }
+  /* USER CODE END 3 */
+}
 
 /**
   * @brief System Clock Configuration
@@ -244,12 +247,14 @@ void SystemClock_Config(void)
   */
 void Error_Handler(void)
 {
-    __disable_irq();
-    while (1);  // Halt execution
-}
-
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
   /* USER CODE END Error_Handler_Debug */
-
+}
 
 #ifdef  USE_FULL_ASSERT
 /**

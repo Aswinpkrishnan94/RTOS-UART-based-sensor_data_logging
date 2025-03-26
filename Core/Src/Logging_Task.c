@@ -10,19 +10,25 @@
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 
-
 extern osMessageQueueId_t SensorQueueHandle, uartQueueHandle;
 extern UART_HandleTypeDef huart3;
 extern osMutexId_t uartMutexHandle;
 
+// Define the struct
+typedef struct {
+    float x;
+    float y;
+    float z;
+}AccelData_t;
+
 /**
   * @brief To receive data from message queue and
-  * sends it to an MQTT server using AT commands over UART2
+  * sends it to an MQTT server using AT commands over UART
   * @retval none
   */
 void StartLoggingTask(void *argument)
 {
-	float temp_received, humid_received;	// temperature and humidity values received
+	AccelData_t acceldata;		// received accelerated data
 	//char mqttbuffer[100];
     char uart_buffer[100];
 
@@ -31,8 +37,7 @@ void StartLoggingTask(void *argument)
 	while(1)
 	{
 		// Retrieve Temperature and Humidity from Sensor
-		if (osMessageQueueGet(SensorQueueHandle, &temp_received, NULL, osWaitForever) == osOK &&
-		    osMessageQueueGet(SensorQueueHandle, &humid_received, NULL, osWaitForever) == osOK)
+		if (osMessageQueueGet(SensorQueueHandle, &acceldata, NULL, osWaitForever) == osOK)
 		{
 		/*
 		// Format MQTT Payload
@@ -48,7 +53,8 @@ void StartLoggingTask(void *argument)
 		}
 		*/
 		// Format Debug Output for PuTTY
-	    snprintf(uart_buffer, sizeof(uart_buffer), "Logging Task: Temperature: %.2f C, Humidity: %.2f %%\r\n", temp_received, humid_received);
+	    snprintf(uart_buffer, sizeof(uart_buffer), "Logging Task: X = %.2f g, Y = %.2f g, Z = %.2f g\r\n",
+                 acceldata.x, acceldata.y, acceldata.z);
 
 	    // Print Output to PuTTY via UART3
 	    HAL_UART_Transmit(&huart3, (uint8_t *)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
@@ -57,6 +63,7 @@ void StartLoggingTask(void *argument)
 		{
 			HAL_UART_Transmit(&huart3, (uint8_t *)"Sensor Data Queue Error!\r\n", 26, HAL_MAX_DELAY);
 		}
+
 	 osDelay(2000);  // Delay of 2s before next log cycle
 	}
 }
